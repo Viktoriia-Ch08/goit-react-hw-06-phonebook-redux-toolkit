@@ -8,11 +8,16 @@ import {
   RadioLabel,
   RadioWrapper,
 } from './ContactForm.styled';
+import { addContact } from 'redux/contactsSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { getContacts } from 'redux/selectors';
 
-export default function Form({ onSubmit }) {
+export default function Form() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const [type, setType] = useState('friend');
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
 
   const handleInputChange = event => {
     switch (event.currentTarget.name) {
@@ -29,7 +34,10 @@ export default function Form({ onSubmit }) {
 
   const handleSubmitButton = e => {
     e.preventDefault();
-    onSubmit({ name, number, type, id: nanoid() });
+    const data = { name, number, type, id: nanoid() };
+    contacts.some(element => element.name === data.name)
+      ? alert('This contact has already exists')
+      : dispatch(addContact(data));
     reset();
   };
 

@@ -1,19 +1,30 @@
 import { ButtonWrapper, DeleteButton, Item, List } from './ContactsList.styled';
 import { FaTrashAlt } from 'react-icons/fa';
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteContacts } from 'redux/contactsSlice';
+import { filterValue, getContacts } from 'redux/selectors';
 
-export default function ContactsList({ contacts, filter, deleteContacts }) {
-  const [contactsToDelete, setContactsToDelete] = useState([]);
+export default function ContactsList() {
+  const [contactsIdsToDelete, setContactIdsToDelete] = useState([]);
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(filterValue);
 
-  const handleCheckboxStatus = selectedContact => {
-    setContactsToDelete(
-      contactsToDelete.includes(selectedContact)
-        ? contactsToDelete.filter(contact => contact !== selectedContact)
-        : [...contactsToDelete, selectedContact]
+  const dispatch = useDispatch();
+
+  const handleDeleteContacts = contactsToDelete => {
+    dispatch(deleteContacts(contactsToDelete));
+  };
+
+  const handleCheckboxStatus = selectedContactId => {
+    setContactIdsToDelete(
+      contactsIdsToDelete.includes(selectedContactId)
+        ? contactsIdsToDelete.filter(id => id !== selectedContactId)
+        : [...contactsIdsToDelete, selectedContactId]
     );
   };
 
-  const reset = () => setContactsToDelete([]);
+  const reset = () => setContactIdsToDelete([]);
 
   return (
     <>
@@ -30,8 +41,8 @@ export default function ContactsList({ contacts, filter, deleteContacts }) {
                 <input
                   type="checkbox"
                   name="contactToDelete"
-                  checked={contactsToDelete.includes(contact)}
-                  onChange={() => handleCheckboxStatus(contact)}
+                  checked={contactsIdsToDelete.includes(contact.id)}
+                  onChange={() => handleCheckboxStatus(contact.id)}
                 />
                 <p>{`${contact.name}: ${contact.number} ${
                   contact.type ? `*${contact.type}*` : ''
@@ -45,10 +56,10 @@ export default function ContactsList({ contacts, filter, deleteContacts }) {
         <DeleteButton
           type="button"
           onClick={() => {
-            if (contactsToDelete.length === 0)
+            if (contactsIdsToDelete.length === 0)
               alert('Choose contact(s) to delete');
             else {
-              deleteContacts(contactsToDelete);
+              handleDeleteContacts(contactsIdsToDelete);
               reset();
             }
           }}
